@@ -15,10 +15,11 @@ typedef struct Minheap {
 } Minheap;
 
 //Structure for the linked list that has the tokens with frequenices in lowest to highest order
-typedef struct node {
+typedef struct list_node {
     unsigned int freq;
     char* token;
     struct list_node* next;
 } list_node;
 
 void HuffmanCodes(int size, list_node* node, int fileDir);
+
