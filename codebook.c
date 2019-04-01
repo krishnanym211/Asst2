@@ -204,7 +204,7 @@ void HuffmanCodes(list_node* data, unsigned int size){
     
     // Print Huffman codes using
     // the Huffman tree built above
-    int arr[size];
+    unsigned short arr[size];
     
     printCodes(root, arr, 0);
 }
