@@ -7,5 +7,6 @@
 
 
 int main(int argc, char **argv){
+	directoryHandler("test/", "index");
 	return 0;
 }

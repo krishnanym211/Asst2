@@ -29,12 +29,14 @@ char* getPath(char* currPath, char* pathToAdd, char* typeOfPathToAdd){
 	}
 }
 
-void fileHandler(char* filename){
-	//add word-indexing logic here
+void fileHandler(char* filename, char* mode){
+    if(strcmp(mode, "index") == 0){
+        indexFile(filename);
+    }
 	return;
 }
 
-void directoryHandler(char* directoryName){
+void directoryHandler(char* directoryName, char* mode){
 	
 	struct dirent *dirEnt;
   
@@ -53,13 +55,13 @@ void directoryHandler(char* directoryName){
                 char* currDirectoryName = addSlash(dirEnt->d_name);
 				char* dirPath = getPath(directoryName, currDirectoryName, "directory");
 				printf("Calling directory handler on %s\n", dirPath);
-				directoryHandler(dirPath);
+				directoryHandler(dirPath, mode);
     		}
     		else if(dirEnt->d_type == DT_REG){
     			//Add error checking for file type (i.e. valid file)
 				char* filePath = getPath(directoryName, dirEnt->d_name, "file"); 
 				printf("Calling file handler on %s\n", filePath);
-				fileHandler(filePath);
+				fileHandler(filePath, mode);
                 // Mergesort(globalList);
     		}
 

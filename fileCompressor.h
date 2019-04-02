@@ -4,26 +4,32 @@
 #include <string.h>
 #include <dirent.h>
 
-typedef struct MinHeap {
-	int a;
-} MinHeap;
+void fileHandler(char* filename, char* mode);
 
-typedef struct Node {
-	int a;
-} Node;
+void directoryHandler(char* directoryName, char* mode);
 
-Node* wordFrequenices;
-
-MinHeap* insertIntoMinHeap(MinHeap* base, MinHeap* toAdd);
-
-void buildCodebook();
-//Tokenizer function
-
-//Adds every token from file to global linked list (containing word frequencies)
 int indexFile(char* filename);
 
+//node on the Huffman Tree that carries the word, the frequency and the links to right and left children
+typedef struct MinheapNode {
+    char* token;
+    unsigned int freq;
+    struct MinheapNode *left, *right;
+} MinheapNode;
 
-void buildHuffmanTree();
+//A collection of the Minheap Nodes pointing to each other
+typedef struct Minheap {
+    unsigned int size;
+    //maximum capacity of nodes in the tree
+    unsigned int cap;
+    MinheapNode** tree;
+} Minheap;
 
-//Creates codebook using linked list of frequencies across all files
-void buildCodebook();
+//Structure for the linked list that has the tokens with frequenices in lowest to highest order
+typedef struct list_node {
+    unsigned int freq;
+    char* token;
+    struct list_node* next;
+} list_node;
+
+// void HuffmanCodes(int size, list_node* node, int fileDir);

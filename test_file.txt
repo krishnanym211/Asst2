@@ -1,3 +1,0 @@
-Sample file : Krishna tests this sample file
-to see if words in the sample file
-are counted properly. Krishna hopes this works

@@ -8,18 +8,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "codebook.h"
+#include "fileCompressor.h"
 
 //INDEXING CODE
 
 int errno;
-
-//Structure for the linked list that has the tokens with frequenices in lowest to highest order
-// typedef struct list_node {
-//     unsigned int freq;
-//     char* token;
-//     struct list_node* next;
-// } list_node;
 
 list_node* global_list;
 
@@ -40,6 +33,9 @@ list_node* copy_list_node(list_node* original){
 }
 
 int getLength(list_node* head){
+    if(!head){
+        return 0;
+    }
     list_node* ptr;
     int length = 0;
     for(ptr = head; ptr != NULL; ptr = ptr->next){
@@ -197,12 +193,15 @@ int read_line(int fd, char** lineBufferPtr){
         bytes = read(fd, curr, 1);
         //end of file
         if(bytes == 0){
+            //null terminate string
+            lineBuffer[i] = '\0';
             return 1;
         }
         lineBuffer[i] = curr[0];
         i++;
     }
 
+    //null terminate string
     lineBuffer[i] = '\0';
     return 0;
 }
@@ -231,11 +230,14 @@ void addTokenToIndex(char* token){
 
 }
 
+//Returns 1 on successful execution, 0 otherwise
 int indexFile(char* filename){
 
     int fd;
-    if ((fd = open("test2.txt", O_RDONLY)) == -1){
+    if ((fd = open(filename, O_RDONLY)) == -1){
         perror(strerror(errno));
+        printf("File: %s was unable to be opened\n", filename);
+        return 0;
     }
 
     char* token;
@@ -246,17 +248,25 @@ int indexFile(char* filename){
     char** lineBufferPtr = &lineBuffer;
 
     int endOfFile;
+    int numberOfLines = 0;
     while(endOfFile != 1){
         endOfFile = read_line(fd, lineBufferPtr);
+        
+        if(numberOfLines == 0 && endOfFile){
+            printf("File: %s is empty.\n", filename);
+            return 1;
+        }
 
+        ++numberOfLines;
         //create a duplicate so as to not modify string, make pointer to string
         char* copyOfString = strdup(lineBuffer);
         char** strPtr = &(copyOfString);
-        // printf("String: %s\n", lineBuffer);
+        // printf("Line: |%s|\n", lineBuffer);
         while(*strPtr){
-            token = tokenizer(strPtr);
-            // printf("Token: %s\n", token);
-            addTokenToIndex(token);
+            if((token = tokenizer(strPtr)) != NULL){
+                printf("Token: |%s|\n", token);
+                addTokenToIndex(token);
+            }
         }
     }
 
@@ -358,8 +368,8 @@ int isLeaf (MinheapNode* root){
 Minheap* fullMinheap(unsigned int size, list_node* node){
     Minheap* minheap = createMinheap(size);
     list_node* ptr = node;
-    
-    for (int i = 0; i < size; ++i){
+    int i;
+    for (i = 0; i < size; ++i){
         minheap->tree[i] = createNode(ptr->token, ptr->freq);
         ptr = ptr->next;
         if(ptr==NULL){
@@ -475,57 +485,58 @@ void HuffmanCodes(list_node* data, unsigned int size){
     printCodes(root, arr, 0);
 }
 
-int main() {
+// int main() {
     
-    // list_node* head = NULL;
-    // list_node* a = NULL;
-    // list_node* b = NULL;
-    // list_node* c = NULL;
-    // list_node* d = NULL;
-    // list_node* e = NULL;
+//     // list_node* head = NULL;
+//     // list_node* a = NULL;
+//     // list_node* b = NULL;
+//     // list_node* c = NULL;
+//     // list_node* d = NULL;
+//     // list_node* e = NULL;
     
-    // // allocate 6 nodes in the list
-    // head  = (list_node*)malloc(sizeof(list_node));
-    // a = (list_node*)malloc(sizeof(list_node));
-    // b = (list_node*)malloc(sizeof(list_node));
-    // c = (list_node*)malloc(sizeof(list_node));
-    // d = (list_node*)malloc(sizeof(list_node));
-    // e = (list_node*)malloc(sizeof(list_node));
+//     // // allocate 6 nodes in the list
+//     // head  = (list_node*)malloc(sizeof(list_node));
+//     // a = (list_node*)malloc(sizeof(list_node));
+//     // b = (list_node*)malloc(sizeof(list_node));
+//     // c = (list_node*)malloc(sizeof(list_node));
+//     // d = (list_node*)malloc(sizeof(list_node));
+//     // e = (list_node*)malloc(sizeof(list_node));
     
     
-    // head->token = "a"; //assign data in first node
-    // head->next = a; // Link first node with second
-    // head->freq = 5;
+//     // head->token = "a"; //assign data in first node
+//     // head->next = a; // Link first node with second
+//     // head->freq = 5;
     
-    // a->token = "dog"; //assign data in first node
-    // a->next = b; // Link first node with second
-    // a->freq = 9;
+//     // a->token = "dog"; //assign data in first node
+//     // a->next = b; // Link first node with second
+//     // a->freq = 9;
     
-    // b->token = "cat"; //assign data in first node
-    // b->next = c; // Link first node with second
-    // b->freq = 12;
+//     // b->token = "cat"; //assign data in first node
+//     // b->next = c; // Link first node with second
+//     // b->freq = 12;
     
-    // c->token = "button"; //assign data in first node
-    // c->next = d; // Link first node with second
-    // c->freq = 13;
+//     // c->token = "button"; //assign data in first node
+//     // c->next = d; // Link first node with second
+//     // c->freq = 13;
     
-    // d->token = "ball"; //assign data in first node
-    // d->next = e; // Link first node with second
-    // d->freq = 16;
+//     // d->token = "ball"; //assign data in first node
+//     // d->next = e; // Link first node with second
+//     // d->freq = 16;
     
-    // e->token = "and"; //assign data in first node
-    // e->next = NULL; // Link first node with second
-    // e->freq = 45;
+//     // e->token = "and"; //assign data in first node
+//     // e->next = NULL; // Link first node with second
+//     // e->freq = 45;
 
 
     
-    // unsigned int size = 6;
+//     // unsigned int size = 6;
 
-    indexFile("test_file.txt");
-
-    int size = getLength(global_list);
-    HuffmanCodes(global_list, size);
+//     indexFile("test2.txt");
+//     int size = getLength(global_list);
+//     if(global_list){
+//         HuffmanCodes(global_list, size);
+//     }
     
-    return 0;
-}
+//     return 0;
+// }
 

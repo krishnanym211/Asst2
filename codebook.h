@@ -23,3 +23,4 @@ typedef struct list_node {
 
 // void HuffmanCodes(int size, list_node* node, int fileDir);
 
+int indexFile(char* filename);
