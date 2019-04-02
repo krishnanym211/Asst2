@@ -52,25 +52,6 @@ void printLL(list_node* head){
 	}
 }
 
-// int str_comparator(void* a, void* b){
-//     if(a && b){
-//         char* aLower = toLower(a);
-//         char* bLower = toLower(b);
-//         //if a and b have the same spelling, default to strcmp, which will sort capitals before lowercase
-//         if(strcmp(aLower, bLower) == 0){
-//             return strcmp(a, b);
-//         }
-//         return (-1*strcmp(aLower, bLower));
-//     }
-//     if(a && !b){
-//         return 1;
-//     }
-//     if(!a && b){
-//         return -1;
-//     }
-//     return 0;
-// }
-
 list_node* merge(list_node* left, list_node* right){
 
     list_node* mergedListHead;
@@ -217,7 +198,7 @@ int read_line(int fd, char** lineBufferPtr){
         lineBuffer[i] = curr[0];
         i++;
     }
-    
+
     lineBuffer[i] = '\0';
     return 0;
 }

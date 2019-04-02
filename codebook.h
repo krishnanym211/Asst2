@@ -21,5 +21,5 @@ typedef struct list_node {
     struct list_node* next;
 } list_node;
 
-void HuffmanCodes(int size, list_node* node, int fileDir);
+// void HuffmanCodes(int size, list_node* node, int fileDir);
 
