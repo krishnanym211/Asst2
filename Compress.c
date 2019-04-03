@@ -73,3 +73,5 @@ void directoryHandler(char* directoryName, char* mode){
     closedir(dir);
     return;
 }
+
+
