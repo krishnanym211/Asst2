@@ -14,8 +14,6 @@
 
 int errno;
 
-list_node* global_list;
-
 list_node* new_list_node(int freq, char* token){
     list_node* new = (struct list_node*)malloc(sizeof(list_node));
     new->freq = freq;
@@ -233,6 +231,7 @@ void addTokenToIndex(char* token){
 //Returns 1 on successful execution, 0 otherwise
 int indexFile(char* filename){
 
+    // printf("indexFile was called on %s\n", filename);
     int fd;
     if ((fd = open(filename, O_RDONLY)) == -1){
         perror(strerror(errno));
@@ -247,11 +246,13 @@ int indexFile(char* filename){
     char* lineBuffer = (char*)calloc(32000, sizeof(char));
     char** lineBufferPtr = &lineBuffer;
 
-    int endOfFile;
+    int endOfFile = 0;
     int numberOfLines = 0;
+
     while(endOfFile != 1){
         endOfFile = read_line(fd, lineBufferPtr);
-        
+        // printf("Line: |%s|\n", lineBuffer);
+
         if(numberOfLines == 0 && endOfFile){
             printf("File: %s is empty.\n", filename);
             return 1;
@@ -261,16 +262,16 @@ int indexFile(char* filename){
         //create a duplicate so as to not modify string, make pointer to string
         char* copyOfString = strdup(lineBuffer);
         char** strPtr = &(copyOfString);
-        // printf("Line: |%s|\n", lineBuffer);
         while(*strPtr){
             if((token = tokenizer(strPtr)) != NULL){
-                printf("Token: |%s|\n", token);
+                // printf("Token: |%s|\n", token);
                 addTokenToIndex(token);
             }
         }
     }
 
-    printLL(global_list);
+    close(fd);
+    // printLL(global_list);
 
     return 1;
 }
@@ -426,64 +427,72 @@ void writeCodes (MinheapNode* node, unsigned short code_arr[], int parent, int f
         }
         write(fileDir, buf, count);
         write(fileDir, "\t", 1);
-        write(fileDir, node->token, strlen(node->token));
+        if(strcmp(node->token, "\t") == 0){
+            write(fileDir, "*t", 2);
+        }
+        else if(strcmp(node->token, "\n") == 0){
+            write(fileDir, "*n", 2);
+        }
+        else{
+            write(fileDir, node->token, strlen(node->token));
+        }
         write(fileDir, "\n", 1);
     }
 }
 
-// void HuffmanCodes(int size, list_node* node, int fileDir){
-//     MinheapNode* floor = buildHuffmanTree(size, node);
-//     unsigned short codes[size];
-//     writeCodes(floor, codes, 0, fileDir);
-// }
+void HuffmanCodes(int size, list_node* node, int fileDir){
+    MinheapNode* floor = buildHuffmanTree(size, node);
+    unsigned short codes[size];
+    writeCodes(floor, codes, 0, fileDir);
+}
 
 //used for testing the Huffman Coding
-void printArr(int arr[], int n)
-{
-    int i;
-    for (i = 0; i < n; ++i)
-        printf("%d", arr[i]);
+// void printArr(int arr[], int n)
+// {
+//     int i;
+//     for (i = 0; i < n; ++i)
+//         printf("%d", arr[i]);
     
-    printf("\n");
-}
+//     printf("\n");
+// }
 
-void printCodes(MinheapNode* root, int arr[], int top){
+// void printCodes(MinheapNode* root, int arr[], int top){
     
-    // Assign 0 to left edge and recur
-    if (root->left) {
+//     // Assign 0 to left edge and recur
+//     if (root->left) {
         
-        arr[top] = 0;
-        printCodes(root->left, arr, top + 1);
-    }
+//         arr[top] = 0;
+//         printCodes(root->left, arr, top + 1);
+//     }
     
-    // Assign 1 to right edge and recur
-    if (root->right) {
+//     // Assign 1 to right edge and recur
+//     if (root->right) {
         
-        arr[top] = 1;
-        printCodes(root->right, arr, top + 1);
-    }
+//         arr[top] = 1;
+//         printCodes(root->right, arr, top + 1);
+//     }
     
-    // If this is a leaf node, then
-    // it contains one of the input
-    // characters, print the character
-    // and its code from arr[]
-    if (isLeaf(root)) {
+//     // If this is a leaf node, then
+//     // it contains one of the input
+//     // characters, print the character
+//     // and its code from arr[]
+//     if (isLeaf(root)) {
         
-        printf("%s: ", root->token);
-        printArr(arr, top);
-    }
-}
+//         printf("%s: ", root->token);
+//         printArr(arr, top);
+//     }
+// }
 
-void HuffmanCodes(list_node* data, unsigned int size){
-    // Construct Huffman Tree
-    MinheapNode* root = buildHuffmanTree(size, data);
+// void HuffmanCodes(list_node* data, unsigned int size){
+//     // Construct Huffman Tree
+//     MinheapNode* root = buildHuffmanTree(size, data);
 
-    // Print Huffman codes using
-    // the Huffman tree built above
-    int arr[size];
+//     // Print Huffman codes using
+//     // the Huffman tree built above
+//     int arr[size];
 
-    printCodes(root, arr, 0);
-}
+//     printCodes(root, arr, 0);
+// }
 
 // int main() {
     

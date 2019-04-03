@@ -30,6 +30,7 @@ char* getPath(char* currPath, char* pathToAdd, char* typeOfPathToAdd){
 }
 
 void fileHandler(char* filename, char* mode){
+    printf("fileHandler: %s\n", filename);
     if(strcmp(mode, "index") == 0){
         indexFile(filename);
     }

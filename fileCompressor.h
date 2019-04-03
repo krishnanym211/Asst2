@@ -32,4 +32,8 @@ typedef struct list_node {
     struct list_node* next;
 } list_node;
 
-// void HuffmanCodes(int size, list_node* node, int fileDir);
+extern list_node* global_list;
+
+int getLength(list_node* head);
+
+void HuffmanCodes(int size, list_node* node, int fileDir);
