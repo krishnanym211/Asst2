@@ -50,9 +50,9 @@ args* parseArgs(int argc, char* argv[]){
 		}		
 	}
 
-	//have found no flag, thus return error
+	//have not found flag, thus return error
 	if(!CLArgs->flag){
-		printf("Error, no flag specified or improper flag.\n");
+		printf("Error, no flag specified or improper flag given.\n");
 		return NULL;
 	}
 
@@ -73,11 +73,32 @@ args* parseArgs(int argc, char* argv[]){
 		}
 	}
 
-	// //Check rest of arguments, starting from i+1
-	// ++i;
-	// for(i; i < argc; i++){
+	++i;
 
-	// }
+	//no more args
+	if(i >= argc){
+		printf("Error, expected path or file argument\n");
+		return NULL;
+	}
+
+	//Assign path input
+	CLArgs->path = argv[i];
+
+	//we expect no more arguments for build
+	if(strcmp(CLArgs->flag, "build") == 0){
+		if(i != argc - 1){
+			printf("Error, too many arguments provided for build flag\n");
+			return NULL;
+		}
+	}
+
+	++i;
+
+	if(i >= argc){
+		printf("Error, expected path of codebook to use\n");
+	}
+
+	CLArgs->codebook = argv[i];
 
 	return CLArgs;
 
