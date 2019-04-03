@@ -37,3 +37,7 @@ extern list_node* global_list;
 int getLength(list_node* head);
 
 void HuffmanCodes(int size, list_node* node, int fileDir);
+
+list_node* Mergesort (list_node* head);
+
+void printLL(list_node* head);

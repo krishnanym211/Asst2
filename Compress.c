@@ -30,10 +30,14 @@ char* getPath(char* currPath, char* pathToAdd, char* typeOfPathToAdd){
 }
 
 void fileHandler(char* filename, char* mode){
-    printf("fileHandler: %s\n", filename);
+    
+    printf("fileHandler: %s, mode: %s\n", filename, mode);
+    
     if(strcmp(mode, "index") == 0){
         indexFile(filename);
+        Mergesort(global_list);
     }
+
 	return;
 }
 
@@ -69,7 +73,6 @@ void directoryHandler(char* directoryName, char* mode){
     		//neither a directory nor a file
     	}
     }
-
     closedir(dir);
     return;
 }
