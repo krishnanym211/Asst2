@@ -4,9 +4,23 @@
 #include <string.h>
 #include <dirent.h>
 
-void fileHandler(char* filename, char* mode);
 
-void directoryHandler(char* directoryName, char* mode);
+typedef struct args {
+    int isRecursive;
+    char* flag;
+    char* path;
+    char* codebook;
+} args;
+
+typedef struct Codes {
+    char* token;
+    char* code;
+    struct Codes* next;
+} Codes;
+
+void fileHandler(char* filename, args* arguments);
+
+void directoryHandler(char* directoryName, args* arguments);
 
 int indexFile(char* filename);
 

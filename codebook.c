@@ -425,17 +425,10 @@ void writeCodes (MinheapNode* node, unsigned short code_arr[], int parent, int f
                 break;
             }
         }
+        
         write(fileDir, buf, count);
         write(fileDir, "\t", 1);
-        if(strcmp(node->token, "\t") == 0){
-            write(fileDir, "*t", 2);
-        }
-        else if(strcmp(node->token, "\n") == 0){
-            write(fileDir, "*n", 2);
-        }
-        else{
-            write(fileDir, node->token, strlen(node->token));
-        }
+        write(fileDir, node->token, strlen(node->token));
         write(fileDir, "\n", 1);
     }
 }

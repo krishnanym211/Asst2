@@ -1,25 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
-#include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <limits.h>
 #include <fcntl.h>
 
 #include "fileCompressor.h"
 
 list_node* global_list;
-
-/*typedef struct args {
-	int isRecursive;
-	char* flag;
-	char* path;
-	char* codebook;
-} args;
 
 args* newArgsObject(){
 	args* newArgsObj = (args*)malloc(sizeof(args));
@@ -37,7 +27,7 @@ args* parseArgs(int argc, char* argv[]){
 
 	//first find flag - should be within first 2 args (not including name of program)
 	//if it is the 3rd arg, improper format
-	int i;
+	int i = 0;
 	for(i = 1; i <= 3; i++){
 		if(strcmp(argv[i], "-b") == 0){
 			CLArgs->flag = "build";
@@ -60,14 +50,14 @@ args* parseArgs(int argc, char* argv[]){
 	}
 
 	//no recursive flag specified
-	if(i == 2){
+	if(i == 1){
 		CLArgs->isRecursive = 0;
 	}
 	
 	//check for recursive flag
 	//flag was 3rd argument, so recursive flag should be 2nd argument
 	else{
-		if(strcmp(argv[2], "-R") == 0){
+		if(strcmp(argv[1], "-R") == 0){
 			CLArgs->isRecursive = 1;
 		}
 		else{
@@ -93,6 +83,9 @@ args* parseArgs(int argc, char* argv[]){
 			printf("Error, too many arguments provided for build flag\n");
 			return NULL;
 		}
+		else{
+			return CLArgs;
+		}
 	}
 
 	++i;
@@ -105,7 +98,7 @@ args* parseArgs(int argc, char* argv[]){
 
 	return CLArgs;
 
-}*/
+}
 
 //Helper used to populate two arrays of Huffman Codes and Tokens from the codebook
 void populate(char ** codes, char ** tokens, char * input, int length) {
@@ -166,77 +159,11 @@ int search(char ** arr, int size, char * string) {
     return -1;
 }
 
-int compress ( int hcz, int file, int codebook){
-    //find total length of file and create a string of that size
-    char * temp = (char *)malloc(sizeof(char) * INT_MAX);
-    int total_length = read(file, temp, INT_MAX);
-    char * input = (char *)malloc(sizeof(char) * (total_length + 1));
-    strcpy(input, temp);
-    free(temp);
-        
-    //put contents of file into one string
-    temp = (char *)malloc(sizeof(char) * INT_MAX);
-    int codebook_length = read(codebook, temp, INT_MAX);
-    char * codebook_input = (char *)malloc(sizeof(char) * (codebook_length + 1));
-    strcpy(codebook_input, temp);
-    free(temp);
+void compress ( int hcz, int file, int codebook){
     
-    // Get total number of tokens in codebook
-    int size = count_codebook(codebook_input, codebook_length);
-    char ** codes = (char **)malloc(sizeof(char *) * size);
-    char ** tokens = (char **)malloc(sizeof(char *) * size);
-    
-    // Put tokens and codes from codebook into respective arrays
-    populate(codes, tokens, codebook_input, codebook_length);
-    
-    int i = 0, j = 0;
-    int token_length = 0;
-    int last_whitespace = 0;
-    // Get indices for whitespace tokens first because they are relatively common
-    int space_index = search(tokens, size, "~)!(@s*#&$^");
-    int tab_index = search(tokens, size, "~)!(@t*#&$^");
-    int nl_index = search(tokens, size, "~)!(@n*#&$^");
-    for (i = 0; i < total_length; ++i) {
-        // Use previous method for tokenizing input
-        if (input[i] == '\t' || input[i] == '\n' || input[i] == ' ') {
-            if (token_length > 0) {
-                char * string = (char *)malloc(sizeof(char) * (token_length + 1));
-                for (j = 0; j < token_length; ++j) {
-                    string[j] = input[last_whitespace + j];
-                }
-                string[token_length] = '\0';
-                last_whitespace += token_length + 1;
-                token_length = 0;
-                /* Write the code that corresponds to the token */
-                int index = search(tokens, size, string);
-                if (index != -1) {
-                    write(hcz, codes[index], strlen(codes[index]));
-                    /* If token is not present in codebook, return with error message (should not happen under normal operation) */
-                } else {
-                    printf("ERROR: No corresponding code for token. Exiting.\n");
-                    return -1;
-                }
-                free(string);
-            } else {
-                ++last_whitespace;
-            }
-            /* Also write the code that corresponds to the current whitespace */
-            if (input[i] == ' ') {
-                write(hcz, codes[space_index], strlen(codes[space_index]));
-            } else if (input[i] == '\t') {
-                write(hcz, codes[tab_index], strlen(codes[tab_index]));
-            } else {
-                write(hcz, codes[nl_index], strlen(codes[nl_index]));
-            }
-            /* If current char is not a separator, just increase token length */
-        } else {
-            ++token_length;
-        }
-    }
-    return 0;
 }
 
-void decompress ( int result, int file, int codebook){
+void decompress (int result, int file, int codebook){
     
     //find total length of file and create a string of that size
     char * temp = (char *)malloc(sizeof(char) * INT_MAX);
@@ -294,6 +221,62 @@ void decompress ( int result, int file, int codebook){
 
 int main(int argc, char **argv){
 
+	args* arguments = parseArgs(argc, argv);
+
+	//args struct is NULL if improper input
+
+	if(!arguments){
+		return 1;
+	}
+
+	if(strcmp(arguments->flag, "build") == 0){
+		
+		if(arguments->isRecursive){
+			directoryHandler(arguments->path, arguments);
+		}
+		else{
+			fileHandler(arguments->path, arguments);
+		}
+		printLL(global_list);
+		mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+		int size = getLength(global_list);
+		int fd = creat("HuffmanCodebook", mode);
+		HuffmanCodes(size, global_list, fd);
+		close(fd);
+	}
+
+
 	
+
+	if(strcmp(arguments->flag, "compress") == 0){
+		
+		if(arguments->isRecursive){
+			directoryHandler(arguments->path, arguments);
+		}
+		else{
+			fileHandler(arguments->path, arguments);
+		}
+	}
+
+	if(strcmp(arguments->flag, "decompress") == 0){
+		
+		if(arguments->isRecursive){
+			directoryHandler(arguments->path, arguments);
+		}
+		else{
+			fileHandler(arguments->path, arguments);
+		}
+		printLL(global_list);
+		mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+		int size = getLength(global_list);
+		int fd = creat("HuffmanCodebook", mode);
+		HuffmanCodes(size, global_list, fd);
+		close(fd);
+	}
+
+
+
+
+
 	return 0;
 }
